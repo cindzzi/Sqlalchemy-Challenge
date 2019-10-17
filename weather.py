@@ -34,6 +34,7 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/start<br/>"
     )
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -94,5 +95,20 @@ def tobs():
 
     return jsonify(station_temp)
 
+@app.route("/api/v1.0/start")
+def start():
+
+total_amount = [Station.station,Station.name,Station.latitude,
+                Station.longitude, Station.elevation, func.sum(Measurement.prcp)]
+amount_rainfall = session.query(*total_amount).\
+    filter(Measurement.station == Station.station).\
+    filter(Measurement.date >=('2016-02-28')).\
+    filter(Measurement.date <=('2016-03-05')).\
+    group_by(Station.name).\
+    order_by(Measurement.prcp).all()
+    amount_rainfall = list(np.ravel(amount_rainfall))
+
+    return jsonify(amount_rainfall)
+    
 if __name__ == "__main__":
     app.run(debug=True)
